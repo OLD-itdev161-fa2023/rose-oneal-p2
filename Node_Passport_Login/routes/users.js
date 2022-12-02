@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('');
+const bcrypt = require('bcryptjs');
+const flash = require('connect-flash');
+const session = require('express-session');
 
 //user model
 const User = require('../models/User');
@@ -19,7 +21,7 @@ router.post('/register', (req, res) => {
     //check required fields
     if(!name || !email || !password || !password2) {
         errors.push({ msg: 'Please fill in all fields' });
-    }
+    } 
 
     //check if passwords match
     if(password !== password2) {
@@ -54,7 +56,27 @@ router.post('/register', (req, res) => {
                         password2
                     }); 
                 } else {
+                    const newUser = new User({
+                        name, 
+                        email,
+                        password
+                    });
 
+                    //hash password
+                    bcrypt.genSalt(10, (err, salt) => 
+                    bcrypt.hash(newUser.password, salt, (err, hash) =>{
+                        if(err) throw err;
+                        //set password to hashed
+                        newUser.password = hash;
+                        //save user
+                        newUser.save()
+                        .then(user => {
+                            req.flash('success_msg', 'You are now registered and can log in');
+                            res.redirect('users/login');
+                        })
+                        .catch(err => console.log(err));
+
+                    }))
                 }
             });
     }
