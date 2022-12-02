@@ -3,7 +3,7 @@ const expressLayouts = require('express-ejs-layouts');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const mongoose = require('mongoose');
-var session = require('express-session');
+const session = require('express-session');
 const flash = require('connect-flash');
 const passport = require('passport');
 
@@ -34,16 +34,17 @@ app.use(session({
 }));
 
 //passport middleware
-app.use(passport.intialize());
+app.use(passport.initialize());
 app.use(passport.session());
 
 //connect flash
 app.use(flash());
 
-//global vars
+//global variables
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
     next();
 });
 
